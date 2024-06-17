@@ -30,14 +30,22 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Post $post)
+    public function store(Request $request)
     {
-        $data = $request->validate(['body' => ['required', 'string', 'max:255']]);
-
-        $post->comments()->create([...$data, 'user_id' => $request->user()->id]);
-
+        $data = $request->validate([
+            'title' => 'required|string|max:255',  // Assuming you have a title
+            'body' => 'required|string|max:255'
+        ]);
+    
+        $post = new Post();  // Assuming you want to create a post, not just a comment
+        $post->title = $data['title'];
+        $post->body = $data['body'];
+        $post->user_id = $request->user()->id;  // Ensure 'user_id' is a valid column in your 'posts' table
+        $post->save();
+    
         return to_route('posts.show', $post)->withFragment('comments');
     }
+    
 
     /**
      * Display the specified resource.
