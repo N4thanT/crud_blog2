@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Controllers\PostController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Post;
 
 class CommentController extends Controller
 {
@@ -59,8 +62,12 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Comment $comment)
+    public function destroy(Post $post, Comment $comment)
     {
-        //
+        $this->authorize('delete', $comment);
+
+        $comment->delete();
+
+        return to_route('posts.show', $post)->withFragment('comments');
     }
 }

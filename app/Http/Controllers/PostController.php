@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Comment;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -29,9 +30,13 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Post $post)
     {
-        //
+        $data = $request->validate(['body' => ['required', 'string', 'max:255']]);
+
+        $post->comments()->create([...$data, 'user_id' => $request->user()->id]);
+
+        return to_route('posts.show', $post)->withFragment('comments');
     }
 
     /**
@@ -40,7 +45,8 @@ class PostController extends Controller
     public function show(Post $post)
     {
         return view('posts.show', [
-            'post' => $post
+            'post' => $post,
+            'comments' => $post->comments()->latest()->with('user')->paginate(10),
         ]);
     }
 
